@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETL Pipeline Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #07090f;
+    --surface:   #0e1220;
+    --surface2:  #141825;
+    --border:    #1e2538;
+    --accent:    #00e5a0;
+    --accent2:   #4f7cff;
+    --accent3:   #ff6b6b;
+    --text:      #e8eaf2;
+    --muted:     #606880;
+    --mono:      'Space Mono', monospace;
+    --sans:      'Sora', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    z-index: 10;
+    background: rgba(7,9,15,.9);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: .75rem;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    border: 2px solid var(--accent);
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px; padding: 5px;
+  }
+  .logo-icon span {
+    background: var(--accent);
+    border-radius: 2px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .logo-icon span:nth-child(2) { animation-delay: .3s; opacity: .6; }
+  .logo-icon span:nth-child(3) { animation-delay: .6s; opacity: .4; }
+  .logo-icon span:nth-child(4) { animation-delay: .9s; opacity: .8; }
+  @keyframes pulse { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
+
+  .logo-text {
+    font-family: var(--mono);
+    font-size: .8rem;
+    letter-spacing: .15em;
+    color: var(--accent);
+  }
+  .logo-sub {
+    font-size: .65rem;
+    color: var(--muted);
+    letter-spacing: .1em;
+  }
+
+  .status-pill {
+    display: flex; align-items: center; gap: .5rem;
+    font-family: var(--mono);
+    font-size: .72rem;
+    color: var(--accent);
+    background: rgba(0,229,160,.08);
+    border: 1px solid rgba(0,229,160,.2);
+    padding: .35rem .75rem;
+    border-radius: 999px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1.5s step-end infinite;
+  }
+  @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0 } }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: .65rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: .75rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── KPI GRID ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .kpi-card:hover {
+    border-color: var(--accent2);
+    transform: translateY(-2px);
+  }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79,124,255,.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .kpi-label {
+    font-size: .7rem;
+    font-family: var(--mono);
+    letter-spacing: .12em;
+    color: var(--muted);
+    margin-bottom: .5rem;
+  }
+  .kpi-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+    font-family: var(--mono);
+  }
+  .kpi-value.accent  { color: var(--accent);  }
+  .kpi-value.accent2 { color: var(--accent2); }
+  .kpi-value.accent3 { color: var(--accent3); }
+
+  .kpi-sub {
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: .4rem;
+  }
+
+  /* ── DASHBOARD GRID ── */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .card-title {
+    font-family: var(--mono);
+    font-size: .75rem;
+    letter-spacing: .1em;
+    color: var(--accent2);
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── CITY TABLE ── */
+  .city-table { width: 100%; border-collapse: collapse; }
+  .city-table th {
+    font-family: var(--mono);
+    font-size: .6rem;
+    letter-spacing: .12em;
+    color: var(--muted);
+    text-align: left;
+    padding: .5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .city-table td {
+    padding: .75rem 0;
+    font-size: .85rem;
+    border-bottom: 1px solid rgba(30,37,56,.5);
+    color: var(--text);
+  }
+  .city-table tr:last-child td { border-bottom: none; }
+  .city-table tr { cursor: pointer; transition: background .15s; }
+  .city-table tr:hover td { color: var(--accent); }
+
+  .temp-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: .8rem;
+    padding: .2rem .5rem;
+    border-radius: 4px;
+    background: rgba(0,229,160,.1);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,160,.2);
+  }
+
+  .bar-cell { width: 80px; }
+  .mini-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+  }
+
+  /* ── TREND CHART ── */
+  .trend-tabs {
+    display: flex; gap: .5rem; margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    font-family: var(--mono);
+    font-size: .65rem;
+    padding: .3rem .7rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .1em;
+  }
+  .tab-btn.active, .tab-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,160,.08);
+  }
+
+  svg.chart { width: 100%; height: 180px; }
+  .chart-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .chart-area { fill: url(#areaGrad); }
+  .chart-dot { fill: var(--accent); }
+  .chart-label { font-family: var(--mono); font-size: 9px; fill: var(--muted); }
+  .chart-val   { font-family: var(--mono); font-size: 8px; fill: var(--accent); }
+
+  /* ── RUN LOG ── */
+  .run-log { display: flex; flex-direction: column; gap: .6rem; }
+  .run-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .75rem 1rem;
+    font-family: var(--mono);
+    font-size: .72rem;
+  }
+  .run-status {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .run-time { color: var(--muted); flex: 1; }
+  .run-meta { color: var(--accent2); }
+
+  /* ── RUN BUTTON ── */
+  .run-btn {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-family: var(--mono);
+    font-size: .75rem;
+    letter-spacing: .1em;
+    padding: .6rem 1.25rem;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: rgba(0,229,160,.1);
+    color: var(--accent);
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: 2rem;
+  }
+  .run-btn:hover {
+    background: rgba(0,229,160,.2);
+    box-shadow: 0 0 20px rgba(0,229,160,.2);
+  }
+  .run-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+  .spinner {
+    width: 12px; height: 12px;
+    border: 2px solid rgba(0,229,160,.3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .run-btn.loading .spinner { display: block; }
+  .run-btn.loading .btn-text { opacity: .6; }
+
+  /* ── LOADING SKELETON ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: .75rem;
+    padding: 3rem;
+    color: var(--muted);
+    text-align: center;
+  }
+  .empty-icon { font-size: 2rem; opacity: .4; }
+  .empty p { font-size: .85rem; line-height: 1.6; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: .75rem;
+    padding: .75rem 1.25rem;
+    border-radius: 8px;
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .3s;
+    box-shadow: 0 0 30px rgba(0,229,160,.2);
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 900px) {
+    .kpi-grid  { grid-template-columns: 1fr 1fr; }
+    .dash-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <div>
+      <div class="logo-text">ETL_PIPELINE</div>
+      <div class="logo-sub">WEATHER ANALYTICS v1.0</div>
+    </div>
+  </div>
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    PIPELINE ACTIVE
+  </div>
+</header>
+
+<main>
+
+  <!-- Run Button -->
+  <button class="run-btn" id="runBtn" onclick="triggerPipeline()">
+    <div class="spinner"></div>
+    <span class="btn-text">▶ RUN_PIPELINE.PY</span>
+  </button>
+
+  <!-- KPI Cards -->
+  <div class="section-label">pipeline_metrics</div>
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card">
+      <div class="kpi-label">TOTAL RECORDS</div>
+      <div class="kpi-value accent2" id="kpi-records">—</div>
+      <div class="kpi-sub">rows in warehouse</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">CITIES TRACKED</div>
+      <div class="kpi-value accent" id="kpi-cities">—</div>
+      <div class="kpi-sub">active data sources</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">AVG TEMPERATURE</div>
+      <div class="kpi-value accent3" id="kpi-temp">—</div>
+      <div class="kpi-sub">°C across all cities</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">PIPELINE RUNS</div>
+      <div class="kpi-value" id="kpi-runs">—</div>
+      <div class="kpi-sub" id="kpi-lastrun">last run: —</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="dash-grid">
+
+    <!-- City Table -->
+    <div class="card">
+      <div class="card-title">// CITY_SNAPSHOT — LATEST LOAD</div>
+      <div id="cityTable">
+        <div class="empty">
+          <div class="empty-icon">📭</div>
+          <p>No data loaded yet.<br>Click <strong>RUN_PIPELINE.PY</strong> to start.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="card">
+      <div class="card-title">// TEMPERATURE_TREND</div>
+      <div class="trend-tabs" id="trendTabs"></div>
+      <svg class="chart" id="trendChart" viewBox="0 0 400 180">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#00e5a0" stop-opacity=".25"/>
+            <stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <text x="200" y="90" text-anchor="middle" fill="#606880" font-family="Space Mono" font-size="11">
+          Run the pipeline to see trends
+        </text>
+      </svg>
+    </div>
+
+  </div>
+
+  <!-- Run History -->
+  <div class="section-label">run_history</div>
+  <div id="runLog" class="run-log">
+    <div class="empty">
+      <div class="empty-icon">🕐</div>
+      <p>No pipeline runs recorded yet.</p>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+const API = "";  // same origin (Flask serves index.html)
+let cityData = [];
+
+function toast(msg, dur = 3000) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), dur);
+}
+
+async function fetchJSON(endpoint) {
+  const r = await fetch(API + endpoint);
+  if (!r.ok) throw new Error(r.statusText);
+  return r.json();
+}
+
+async function loadSummary() {
+  try {
+    const d = await fetchJSON("/api/summary");
+    document.getElementById("kpi-records").textContent = d.total_records ?? "0";
+    document.getElementById("kpi-cities").textContent  = d.total_cities  ?? "0";
+    document.getElementById("kpi-temp").textContent    = d.overall_avg_temp != null ? d.overall_avg_temp + "°" : "—";
+    document.getElementById("kpi-runs").textContent    = d.pipeline_runs ?? "0";
+    if (d.last_run) {
+      const dt = new Date(d.last_run);
+      document.getElementById("kpi-lastrun").textContent = "last run: " + dt.toLocaleString();
+    }
+  } catch {}
+}
+
+async function loadCities() {
+  try {
+    cityData = await fetchJSON("/api/cities");
+    if (!cityData.length) return;
+    const maxTemp = Math.max(...cityData.map(c => c.avg_temp_c));
+    const html = `
+      <table class="city-table">
+        <thead>
+          <tr>
+            <th>CITY</th>
+            <th>AVG °C</th>
+            <th>MAX</th>
+            <th>HUM%</th>
+            <th>WIND</th>
+            <th style="width:80px">LOAD</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${cityData.map(c => `
+            <tr onclick="loadTrend('${c.city}')">
+              <td>${c.city}</td>
+              <td><span class="temp-badge">${c.avg_temp_c}°</span></td>
+              <td>${c.max_temp_c}°</td>
+              <td>${c.avg_humidity ?? "—"}%</td>
+              <td>${c.avg_wind_kmh ?? "—"} km/h</td>
+              <td class="bar-cell">
+                <div class="mini-bar" style="width:${Math.round((c.avg_temp_c/maxTemp)*100)}%"></div>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>`;
+    document.getElementById("cityTable").innerHTML = html;
+
+    // Build tabs
+    const tabs = document.getElementById("trendTabs");
+    tabs.innerHTML = cityData.map((c, i) =>
+      `<button class="tab-btn${i===0?' active':''}" onclick="loadTrend('${c.city}', this)">${c.city}</button>`
+    ).join("");
+
+    // Load first city trend
+    if (cityData.length) loadTrend(cityData[0].city);
+  } catch {}
+}
+
+async function loadTrend(city, btn) {
+  if (btn) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  }
+  try {
+    const data = await fetchJSON(`/api/trend/${encodeURIComponent(city)}`);
+    drawChart(data, city);
+  } catch {}
+}
+
+function drawChart(data, city) {
+  const svg = document.getElementById("trendChart");
+  if (!data.length) {
+    svg.innerHTML = `<text x="200" y="90" text-anchor="middle" fill="#606880" font-family="Space Mono" font-size="11">No trend data</text>`;
+    return;
+  }
+
+  const W = 400, H = 180, PAD = { t:20, r:20, b:40, l:40 };
+  const temps = data.map(d => d.avg_temp_c);
+  const minT = Math.min(...temps) - 2;
+  const maxT = Math.max(...temps) + 2;
+  const xStep = (W - PAD.l - PAD.r) / Math.max(data.length - 1, 1);
+  const yScale = t => PAD.t + (H - PAD.t - PAD.b) * (1 - (t - minT) / (maxT - minT));
+  const xOf = i => PAD.l + i * xStep;
+
+  const pts = data.map((d, i) => [xOf(i), yScale(d.avg_temp_c)]);
+  const pathD = pts.map((p, i) => (i === 0 ? `M` : `L`) + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  const areaD = pathD + ` L${pts[pts.length-1][0].toFixed(1)},${H-PAD.b} L${PAD.l},${H-PAD.b} Z`;
+
+  const gridLines = [0, .25, .5, .75, 1].map(f => {
+    const y = PAD.t + (H - PAD.t - PAD.b) * f;
+    const val = (maxT - (maxT - minT) * f).toFixed(1);
+    return `<line x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}" stroke="#1e2538" stroke-width="1"/>
+            <text x="${PAD.l - 4}" y="${y + 3}" class="chart-label" text-anchor="end">${val}</text>`;
+  }).join("");
+
+  const dots = pts.map((p, i) =>
+    `<circle cx="${p[0]}" cy="${p[1]}" r="3" class="chart-dot"/>
+     <text x="${p[0]}" y="${p[1]-8}" class="chart-val" text-anchor="middle">${temps[i]}°</text>`
+  ).join("");
+
+  const labels = data.map((d, i) => {
+    const date = d.date.slice(5); // MM-DD
+    return `<text x="${xOf(i)}" y="${H-PAD.b+14}" class="chart-label" text-anchor="middle">${date}</text>`;
+  }).join("");
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#00e5a0" stop-opacity=".25"/>
+        <stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${gridLines}
+    <path d="${areaD}" class="chart-area"/>
+    <path d="${pathD}" class="chart-line"/>
+    ${dots}${labels}
+  `;
+}
+
+async function loadRunHistory() {
+  try {
+    const runs = await fetchJSON("/api/runs");
+    if (!runs.length) return;
+    document.getElementById("runLog").innerHTML = runs.map(r => {
+      const dt = new Date(r.run_at);
+      return `
+        <div class="run-row">
+          <div class="run-status"></div>
+          <div class="run-time">${dt.toLocaleString()}</div>
+          <div class="run-meta">${r.cities} cities · ${r.records} records</div>
+          <div style="color:var(--accent);font-size:.65rem">${r.status.toUpperCase()}</div>
+        </div>`;
+    }).join("");
+  } catch {}
+}
+
+async function triggerPipeline() {
+  const btn = document.getElementById("runBtn");
+  btn.disabled = true;
+  btn.classList.add("loading");
+  btn.querySelector(".btn-text").textContent = "RUNNING...";
+
+  try {
+    const r = await fetch("/api/run", { method: "POST" });
+    if (!r.ok) throw new Error();
+    toast("✅ Pipeline completed successfully");
+    await refresh();
+  } catch {
+    toast("⚠️  Start server first: python server.py");
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("loading");
+    btn.querySelector(".btn-text").textContent = "▶ RUN_PIPELINE.PY";
+  }
+}
+
+async function refresh() {
+  await Promise.all([loadSummary(), loadCities(), loadRunHistory()]);
+}
+
+// Initial load
+refresh();
+// Auto-refresh every 30s
+setInterval(refresh, 30000);
+</script>
+</body>
+</html>
