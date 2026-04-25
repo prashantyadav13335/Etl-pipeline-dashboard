@@ -2,6 +2,7 @@
 ETL Pipeline — Weather Data
 Extracts from Open-Meteo API (free, no key needed)
 Transforms & loads into SQLite database
+Cities are stored in DB — manageable from dashboard without touching code!
 """
 
 import sqlite3
@@ -18,13 +19,131 @@ logger = logging.getLogger(__name__)
 
 DB_PATH = "data/pipeline.db"
 
-CITIES = [
+# Default cities (only used on FIRST run to seed the DB)
+DEFAULT_CITIES = [
     {"name": "Delhi",     "lat": 28.6139, "lon": 77.2090},
     {"name": "Mumbai",    "lat": 19.0760, "lon": 72.8777},
     {"name": "Bengaluru", "lat": 12.9716, "lon": 77.5946},
     {"name": "Kolkata",   "lat": 22.5726, "lon": 88.3639},
     {"name": "Chennai",   "lat": 13.0827, "lon": 80.2707},
 ]
+
+
+# ─── DATABASE INIT ────────────────────────────────────────────────────────────
+
+def init_db(conn: sqlite3.Connection):
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS pipeline_runs (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_at      TEXT NOT NULL,
+            cities      INTEGER,
+            records     INTEGER,
+            status      TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS weather_daily (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            city          TEXT    NOT NULL,
+            date          TEXT    NOT NULL,
+            avg_temp_c    REAL,
+            max_temp_c    REAL,
+            min_temp_c    REAL,
+            avg_humidity  REAL,
+            avg_wind_kmh  REAL,
+            total_precip  REAL,
+            loaded_at     TEXT,
+            UNIQUE(city, date)
+        );
+
+        CREATE TABLE IF NOT EXISTS managed_cities (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            name      TEXT    NOT NULL UNIQUE,
+            lat       REAL    NOT NULL,
+            lon       REAL    NOT NULL,
+            added_at  TEXT    NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_city_date ON weather_daily (city, date);
+    """)
+    conn.commit()
+
+    # Seed default cities if table is empty
+    count = conn.execute("SELECT COUNT(*) FROM managed_cities").fetchone()[0]
+    if count == 0:
+        logger.info("🌱 Seeding default cities into DB...")
+        conn.executemany(
+            "INSERT OR IGNORE INTO managed_cities (name, lat, lon, added_at) VALUES (?, ?, ?, ?)",
+            [(c["name"], c["lat"], c["lon"], datetime.now().isoformat()) for c in DEFAULT_CITIES]
+        )
+        conn.commit()
+
+
+def get_cities_from_db(conn: sqlite3.Connection) -> list[dict]:
+    rows = conn.execute("SELECT name, lat, lon FROM managed_cities ORDER BY id").fetchall()
+    return [{"name": r[0], "lat": r[1], "lon": r[2]} for r in rows]
+
+
+# ─── CITY MANAGEMENT ──────────────────────────────────────────────────────────
+
+def add_city(name: str, lat: float, lon: float) -> dict:
+    """Add a new city to managed_cities and immediately fetch its data."""
+    conn = sqlite3.connect(DB_PATH)
+    init_db(conn)
+    try:
+        conn.execute(
+            "INSERT INTO managed_cities (name, lat, lon, added_at) VALUES (?, ?, ?, ?)",
+            (name, lat, lon, datetime.now().isoformat())
+        )
+        conn.commit()
+        logger.info(f"➕ Added city: {name} ({lat}, {lon})")
+
+        # Run ETL just for this city
+        city_dict = {"name": name, "lat": lat, "lon": lon}
+        raw = extract(city_dict)
+        if raw:
+            records = transform(raw, name)
+            load(conn, records)
+            logger.info(f"✅ Data loaded for new city: {name}")
+            conn.close()
+            return {"status": "success", "city": name, "records": len(records)}
+        conn.close()
+        return {"status": "success", "city": name, "records": 0}
+    except sqlite3.IntegrityError:
+        conn.close()
+        return {"status": "error", "message": f"{name} already exists"}
+
+
+def remove_city(name: str) -> dict:
+    """Remove a city from managed_cities and its weather data."""
+    conn = sqlite3.connect(DB_PATH)
+    init_db(conn)
+    conn.execute("DELETE FROM managed_cities WHERE name = ?", (name,))
+    conn.execute("DELETE FROM weather_daily WHERE city = ?", (name,))
+    conn.commit()
+    conn.close()
+    logger.info(f"🗑️ Removed city: {name}")
+    return {"status": "success", "city": name}
+
+
+def geocode_city(city_name: str) -> dict | None:
+    """Use Open-Meteo geocoding API to find lat/lon for a city name."""
+    try:
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+        r = requests.get(url, params={"name": city_name, "count": 1, "language": "en", "format": "json"}, timeout=8)
+        r.raise_for_status()
+        results = r.json().get("results", [])
+        if results:
+            res = results[0]
+            return {
+                "name": res.get("name", city_name),
+                "lat": round(res["latitude"], 4),
+                "lon": round(res["longitude"], 4),
+                "country": res.get("country", ""),
+            }
+    except Exception as e:
+        logger.warning(f"Geocoding failed for {city_name}: {e}")
+    return None
+
 
 # ─── EXTRACT ──────────────────────────────────────────────────────────────────
 
@@ -33,7 +152,6 @@ def _mock_data(city: dict) -> dict:
     import random, math
     random.seed(hash(city["name"]) % 2**31)
 
-    # Base temps by latitude (hotter near equator)
     base_temp = 38 - abs(city["lat"] - 8) * 0.6 + random.uniform(-2, 2)
     times, temps, humidity, wind, precip = [], [], [], [], []
 
@@ -42,7 +160,6 @@ def _mock_data(city: dict) -> dict:
         for hour in range(24):
             dt = start + timedelta(days=day, hours=hour)
             times.append(dt.strftime("%Y-%m-%dT%H:%M"))
-            # Diurnal cycle: cooler at night, hotter at 2pm
             hour_factor = math.sin(math.pi * (hour - 6) / 12) if 6 <= hour <= 18 else -0.3
             temps.append(round(base_temp + hour_factor * 6 + random.uniform(-1, 1), 1))
             humidity.append(round(55 + random.uniform(-15, 15), 1))
@@ -94,7 +211,7 @@ def transform(raw: dict, city_name: str) -> list[dict]:
     daily_buckets: dict[str, list] = {}
 
     for i, timestamp in enumerate(times):
-        date = timestamp[:10]                        # YYYY-MM-DD
+        date = timestamp[:10]
         if date not in daily_buckets:
             daily_buckets[date] = []
         daily_buckets[date].append({
@@ -132,35 +249,6 @@ def transform(raw: dict, city_name: str) -> list[dict]:
 
 # ─── LOAD ─────────────────────────────────────────────────────────────────────
 
-def init_db(conn: sqlite3.Connection):
-    conn.executescript("""
-        CREATE TABLE IF NOT EXISTS pipeline_runs (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            run_at      TEXT NOT NULL,
-            cities      INTEGER,
-            records     INTEGER,
-            status      TEXT
-        );
-
-        CREATE TABLE IF NOT EXISTS weather_daily (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            city          TEXT    NOT NULL,
-            date          TEXT    NOT NULL,
-            avg_temp_c    REAL,
-            max_temp_c    REAL,
-            min_temp_c    REAL,
-            avg_humidity  REAL,
-            avg_wind_kmh  REAL,
-            total_precip  REAL,
-            loaded_at     TEXT,
-            UNIQUE(city, date)
-        );
-
-        CREATE INDEX IF NOT EXISTS idx_city_date ON weather_daily (city, date);
-    """)
-    conn.commit()
-
-
 def load(conn: sqlite3.Connection, records: list[dict]) -> int:
     """Upsert transformed records — idempotent runs."""
     sql = """
@@ -189,14 +277,15 @@ def load(conn: sqlite3.Connection, records: list[dict]) -> int:
 
 def run_pipeline():
     logger.info("🚀 Pipeline started")
-    conn         = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH)
     init_db(conn)
 
-    run_at       = datetime.now().isoformat()
-    total        = 0
-    cities_done  = 0
+    cities = get_cities_from_db(conn)
+    run_at      = datetime.now().isoformat()
+    total       = 0
+    cities_done = 0
 
-    for city in CITIES:
+    for city in cities:
         raw = extract(city)
         if raw is None:
             continue

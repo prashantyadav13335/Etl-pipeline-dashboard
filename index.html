@@ -30,7 +30,6 @@
     overflow-x: hidden;
   }
 
-  /* Grid noise texture overlay */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -56,9 +55,7 @@
     backdrop-filter: blur(12px);
   }
 
-  .logo {
-    display: flex; align-items: center; gap: .75rem;
-  }
+  .logo { display: flex; align-items: center; gap: .75rem; }
   .logo-icon {
     width: 32px; height: 32px;
     border: 2px solid var(--accent);
@@ -77,22 +74,12 @@
   .logo-icon span:nth-child(4) { animation-delay: .9s; opacity: .8; }
   @keyframes pulse { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
 
-  .logo-text {
-    font-family: var(--mono);
-    font-size: .8rem;
-    letter-spacing: .15em;
-    color: var(--accent);
-  }
-  .logo-sub {
-    font-size: .65rem;
-    color: var(--muted);
-    letter-spacing: .1em;
-  }
+  .logo-text { font-family: var(--mono); font-size: .8rem; letter-spacing: .15em; color: var(--accent); }
+  .logo-sub  { font-size: .65rem; color: var(--muted); letter-spacing: .1em; }
 
   .status-pill {
     display: flex; align-items: center; gap: .5rem;
-    font-family: var(--mono);
-    font-size: .72rem;
+    font-family: var(--mono); font-size: .72rem;
     color: var(--accent);
     background: rgba(0,229,160,.08);
     border: 1px solid rgba(0,229,160,.2);
@@ -107,273 +94,209 @@
   }
   @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0 } }
 
-  /* ── MAIN LAYOUT ── */
+  /* ── MAIN ── */
   main {
-    position: relative;
-    z-index: 1;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2rem;
+    position: relative; z-index: 1;
+    max-width: 1400px; margin: 0 auto; padding: 2rem;
   }
 
-  /* ── SECTION TITLES ── */
   .section-label {
-    font-family: var(--mono);
-    font-size: .65rem;
-    letter-spacing: .2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
+    font-family: var(--mono); font-size: .65rem;
+    letter-spacing: .2em; color: var(--muted);
+    text-transform: uppercase; margin-bottom: 1rem;
     display: flex; align-items: center; gap: .75rem;
   }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  /* ── KPI GRID ── */
+  /* ── KPI ── */
   .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1rem; margin-bottom: 2rem;
   }
-
   .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+    position: relative; overflow: hidden;
     transition: border-color .2s, transform .2s;
   }
-  .kpi-card:hover {
-    border-color: var(--accent2);
-    transform: translateY(-2px);
-  }
+  .kpi-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
   .kpi-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(79,124,255,.06) 0%, transparent 60%);
     pointer-events: none;
   }
-  .kpi-label {
-    font-size: .7rem;
-    font-family: var(--mono);
-    letter-spacing: .12em;
-    color: var(--muted);
-    margin-bottom: .5rem;
-  }
-  .kpi-value {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-    font-family: var(--mono);
-  }
+  .kpi-label { font-size: .7rem; font-family: var(--mono); letter-spacing: .12em; color: var(--muted); margin-bottom: .5rem; }
+  .kpi-value { font-size: 2.2rem; font-weight: 700; color: var(--text); line-height: 1; font-family: var(--mono); }
   .kpi-value.accent  { color: var(--accent);  }
   .kpi-value.accent2 { color: var(--accent2); }
   .kpi-value.accent3 { color: var(--accent3); }
+  .kpi-sub { font-size: .72rem; color: var(--muted); margin-top: .4rem; }
 
-  .kpi-sub {
-    font-size: .72rem;
-    color: var(--muted);
-    margin-top: .4rem;
-  }
+  /* ── DASH GRID ── */
+  .dash-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; margin-bottom: 2rem; }
 
-  /* ── DASHBOARD GRID ── */
-  .dash-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  /* ── CARDS ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-  }
-  .card-title {
-    font-family: var(--mono);
-    font-size: .75rem;
-    letter-spacing: .1em;
-    color: var(--accent2);
-    margin-bottom: 1.25rem;
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+  .card-title { font-family: var(--mono); font-size: .75rem; letter-spacing: .1em; color: var(--accent2); margin-bottom: 1.25rem; }
 
   /* ── CITY TABLE ── */
   .city-table { width: 100%; border-collapse: collapse; }
   .city-table th {
-    font-family: var(--mono);
-    font-size: .6rem;
-    letter-spacing: .12em;
-    color: var(--muted);
-    text-align: left;
-    padding: .5rem 0;
+    font-family: var(--mono); font-size: .6rem; letter-spacing: .12em;
+    color: var(--muted); text-align: left; padding: .5rem 0;
     border-bottom: 1px solid var(--border);
   }
   .city-table td {
-    padding: .75rem 0;
-    font-size: .85rem;
-    border-bottom: 1px solid rgba(30,37,56,.5);
-    color: var(--text);
+    padding: .75rem 0; font-size: .85rem;
+    border-bottom: 1px solid rgba(30,37,56,.5); color: var(--text);
   }
   .city-table tr:last-child td { border-bottom: none; }
   .city-table tr { cursor: pointer; transition: background .15s; }
   .city-table tr:hover td { color: var(--accent); }
 
   .temp-badge {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: .8rem;
-    padding: .2rem .5rem;
-    border-radius: 4px;
-    background: rgba(0,229,160,.1);
-    color: var(--accent);
+    display: inline-block; font-family: var(--mono); font-size: .8rem;
+    padding: .2rem .5rem; border-radius: 4px;
+    background: rgba(0,229,160,.1); color: var(--accent);
     border: 1px solid rgba(0,229,160,.2);
   }
-
   .bar-cell { width: 80px; }
-  .mini-bar {
-    height: 4px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-  }
+  .mini-bar { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
 
-  /* ── TREND CHART ── */
-  .trend-tabs {
-    display: flex; gap: .5rem; margin-bottom: 1rem;
-    flex-wrap: wrap;
+  .remove-btn {
+    background: none; border: 1px solid rgba(255,107,107,.3);
+    color: var(--accent3); border-radius: 4px;
+    padding: .15rem .4rem; font-size: .65rem;
+    cursor: pointer; font-family: var(--mono);
+    transition: all .15s; white-space: nowrap;
   }
+  .remove-btn:hover { background: rgba(255,107,107,.15); border-color: var(--accent3); }
+
+  /* ── TREND ── */
+  .trend-tabs { display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap; }
   .tab-btn {
-    font-family: var(--mono);
-    font-size: .65rem;
-    padding: .3rem .7rem;
-    border-radius: 6px;
+    font-family: var(--mono); font-size: .65rem;
+    padding: .3rem .7rem; border-radius: 6px;
     border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .15s;
-    letter-spacing: .1em;
+    background: transparent; color: var(--muted);
+    cursor: pointer; transition: all .15s; letter-spacing: .1em;
   }
   .tab-btn.active, .tab-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
+    border-color: var(--accent); color: var(--accent);
     background: rgba(0,229,160,.08);
   }
-
   svg.chart { width: 100%; height: 180px; }
   .chart-line { fill: none; stroke: var(--accent); stroke-width: 2; }
   .chart-area { fill: url(#areaGrad); }
-  .chart-dot { fill: var(--accent); }
+  .chart-dot  { fill: var(--accent); }
   .chart-label { font-family: var(--mono); font-size: 9px; fill: var(--muted); }
   .chart-val   { font-family: var(--mono); font-size: 8px; fill: var(--accent); }
 
   /* ── RUN LOG ── */
   .run-log { display: flex; flex-direction: column; gap: .6rem; }
   .run-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: .75rem 1rem;
-    font-family: var(--mono);
-    font-size: .72rem;
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: .75rem 1rem;
+    font-family: var(--mono); font-size: .72rem;
   }
-  .run-status {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    flex-shrink: 0;
-  }
+  .run-status { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
   .run-time { color: var(--muted); flex: 1; }
   .run-meta { color: var(--accent2); }
 
-  /* ── RUN BUTTON ── */
+  /* ── BUTTONS ── */
   .run-btn {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    font-family: var(--mono);
-    font-size: .75rem;
-    letter-spacing: .1em;
-    padding: .6rem 1.25rem;
-    border-radius: 8px;
-    border: 1px solid var(--accent);
-    background: rgba(0,229,160,.1);
-    color: var(--accent);
-    cursor: pointer;
-    transition: all .2s;
-    margin-bottom: 2rem;
+    display: flex; align-items: center; gap: .5rem;
+    font-family: var(--mono); font-size: .75rem;
+    letter-spacing: .1em; padding: .6rem 1.25rem;
+    border-radius: 8px; border: 1px solid var(--accent);
+    background: rgba(0,229,160,.1); color: var(--accent);
+    cursor: pointer; transition: all .2s; margin-bottom: 2rem;
   }
-  .run-btn:hover {
-    background: rgba(0,229,160,.2);
-    box-shadow: 0 0 20px rgba(0,229,160,.2);
-  }
-  .run-btn:disabled {
-    opacity: .4;
-    cursor: not-allowed;
-  }
+  .run-btn:hover { background: rgba(0,229,160,.2); box-shadow: 0 0 20px rgba(0,229,160,.2); }
+  .run-btn:disabled { opacity: .4; cursor: not-allowed; }
   .spinner {
     width: 12px; height: 12px;
-    border: 2px solid rgba(0,229,160,.3);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin .8s linear infinite;
-    display: none;
+    border: 2px solid rgba(0,229,160,.3); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin .8s linear infinite; display: none;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   .run-btn.loading .spinner { display: block; }
   .run-btn.loading .btn-text { opacity: .6; }
 
-  /* ── LOADING SKELETON ── */
+  /* ── CITY MANAGER ── */
+  .city-manager {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;
+  }
+  .city-manager-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .add-city-row {
+    display: flex; gap: .6rem; align-items: center; flex-wrap: wrap;
+  }
+
+  .city-select, .city-input {
+    font-family: var(--mono); font-size: .75rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px;
+    padding: .5rem .85rem; outline: none;
+    transition: border-color .2s;
+  }
+  .city-select { cursor: pointer; min-width: 180px; }
+  .city-input  { min-width: 160px; }
+  .city-select:focus, .city-input:focus { border-color: var(--accent2); }
+
+  .add-btn {
+    font-family: var(--mono); font-size: .72rem;
+    padding: .5rem 1rem; border-radius: 8px;
+    border: 1px solid var(--accent2); background: rgba(79,124,255,.12);
+    color: var(--accent2); cursor: pointer; transition: all .2s;
+    white-space: nowrap;
+  }
+  .add-btn:hover { background: rgba(79,124,255,.25); box-shadow: 0 0 16px rgba(79,124,255,.2); }
+  .add-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .city-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  .city-chip {
+    display: flex; align-items: center; gap: .4rem;
+    font-family: var(--mono); font-size: .68rem;
+    padding: .3rem .6rem; border-radius: 6px;
+    background: rgba(0,229,160,.07); border: 1px solid rgba(0,229,160,.15);
+    color: var(--accent);
+  }
+  .chip-remove {
+    background: none; border: none; color: var(--accent3);
+    cursor: pointer; font-size: .8rem; line-height: 1;
+    padding: 0 2px; transition: transform .15s;
+  }
+  .chip-remove:hover { transform: scale(1.3); }
+
+  /* ── MISC ── */
   .skeleton {
     background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
+    background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;
   }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
-  /* ── EMPTY STATE ── */
   .empty {
     display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: .75rem;
-    padding: 3rem;
-    color: var(--muted);
-    text-align: center;
+    justify-content: center; gap: .75rem; padding: 3rem;
+    color: var(--muted); text-align: center;
   }
   .empty-icon { font-size: 2rem; opacity: .4; }
   .empty p { font-size: .85rem; line-height: 1.6; }
 
-  /* ── TOAST ── */
   #toast {
-    position: fixed;
-    bottom: 2rem; right: 2rem;
-    background: var(--surface2);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: .75rem;
-    padding: .75rem 1.25rem;
-    border-radius: 8px;
-    z-index: 999;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all .3s;
-    box-shadow: 0 0 30px rgba(0,229,160,.2);
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--surface2); border: 1px solid var(--accent);
+    color: var(--accent); font-family: var(--mono); font-size: .75rem;
+    padding: .75rem 1.25rem; border-radius: 8px; z-index: 999;
+    transform: translateY(80px); opacity: 0; transition: all .3s;
+    box-shadow: 0 0 30px rgba(0,229,160,.2); max-width: 320px;
   }
   #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.error { border-color: var(--accent3); color: var(--accent3); }
 
   @media (max-width: 900px) {
     .kpi-grid  { grid-template-columns: 1fr 1fr; }
@@ -394,7 +317,7 @@
     </div>
     <div>
       <div class="logo-text">ETL_PIPELINE</div>
-      <div class="logo-sub">WEATHER ANALYTICS v1.0</div>
+      <div class="logo-sub">WEATHER ANALYTICS v2.0</div>
     </div>
   </div>
   <div class="status-pill">
@@ -433,6 +356,79 @@
       <div class="kpi-label">PIPELINE RUNS</div>
       <div class="kpi-value" id="kpi-runs">—</div>
       <div class="kpi-sub" id="kpi-lastrun">last run: —</div>
+    </div>
+  </div>
+
+  <!-- ── CITY MANAGER ── -->
+  <div class="section-label">city_manager</div>
+  <div class="city-manager">
+    <div class="city-manager-header">
+      <div class="card-title" style="margin:0">// ADD / REMOVE CITIES — NO CODE NEEDED</div>
+    </div>
+
+    <div class="add-city-row">
+      <!-- Popular cities dropdown -->
+      <select class="city-select" id="citySelect" onchange="onSelectChange()">
+        <option value="">— Popular Cities —</option>
+        <optgroup label="North India">
+          <option value="Hyderabad">Hyderabad</option>
+          <option value="Jaipur">Jaipur</option>
+          <option value="Lucknow">Lucknow</option>
+          <option value="Chandigarh">Chandigarh</option>
+          <option value="Varanasi">Varanasi</option>
+          <option value="Agra">Agra</option>
+          <option value="Dehradun">Dehradun</option>
+          <option value="Amritsar">Amritsar</option>
+          <option value="Noida">Noida</option>
+          <option value="Gurgaon">Gurgaon</option>
+        </optgroup>
+        <optgroup label="West India">
+          <option value="Pune">Pune</option>
+          <option value="Ahmedabad">Ahmedabad</option>
+          <option value="Surat">Surat</option>
+          <option value="Nagpur">Nagpur</option>
+          <option value="Nashik">Nashik</option>
+          <option value="Vadodara">Vadodara</option>
+          <option value="Rajkot">Rajkot</option>
+        </optgroup>
+        <optgroup label="South India">
+          <option value="Coimbatore">Coimbatore</option>
+          <option value="Kochi">Kochi</option>
+          <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+          <option value="Mysuru">Mysuru</option>
+          <option value="Visakhapatnam">Visakhapatnam</option>
+          <option value="Madurai">Madurai</option>
+        </optgroup>
+        <optgroup label="East India">
+          <option value="Bhubaneswar">Bhubaneswar</option>
+          <option value="Guwahati">Guwahati</option>
+          <option value="Patna">Patna</option>
+          <option value="Ranchi">Ranchi</option>
+        </optgroup>
+        <optgroup label="Central India">
+          <option value="Bhopal">Bhopal</option>
+          <option value="Indore">Indore</option>
+          <option value="Raipur">Raipur</option>
+        </optgroup>
+        <option value="__custom__">✏️ Type custom city...</option>
+      </select>
+
+      <!-- Custom city input (hidden by default) -->
+      <input
+        class="city-input" id="customCityInput"
+        placeholder="Type city name..."
+        style="display:none"
+        onkeydown="if(event.key==='Enter') addCity()"
+      />
+
+      <button class="add-btn" id="addBtn" onclick="addCity()">
+        ＋ ADD CITY
+      </button>
+    </div>
+
+    <!-- Current city chips -->
+    <div class="city-chips" id="cityChips">
+      <span style="font-size:.72rem;color:var(--muted);font-family:var(--mono)">Loading cities...</span>
     </div>
   </div>
 
@@ -483,22 +479,27 @@
 <div id="toast"></div>
 
 <script>
-const API = "";  // same origin (Flask serves index.html)
+const API = "";
 let cityData = [];
+let managedCities = [];
 
-function toast(msg, dur = 3000) {
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function toast(msg, type = "success", dur = 4000) {
   const t = document.getElementById("toast");
   t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), dur);
+  t.className = "show" + (type === "error" ? " error" : "");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = "", dur);
 }
 
+// ── FETCH HELPER ───────────────────────────────────────────────────────────
 async function fetchJSON(endpoint) {
   const r = await fetch(API + endpoint);
   if (!r.ok) throw new Error(r.statusText);
   return r.json();
 }
 
+// ── KPI ────────────────────────────────────────────────────────────────────
 async function loadSummary() {
   try {
     const d = await fetchJSON("/api/summary");
@@ -507,12 +508,12 @@ async function loadSummary() {
     document.getElementById("kpi-temp").textContent    = d.overall_avg_temp != null ? d.overall_avg_temp + "°" : "—";
     document.getElementById("kpi-runs").textContent    = d.pipeline_runs ?? "0";
     if (d.last_run) {
-      const dt = new Date(d.last_run);
-      document.getElementById("kpi-lastrun").textContent = "last run: " + dt.toLocaleString();
+      document.getElementById("kpi-lastrun").textContent = "last run: " + new Date(d.last_run).toLocaleString();
     }
   } catch {}
 }
 
+// ── CITY TABLE ─────────────────────────────────────────────────────────────
 async function loadCities() {
   try {
     cityData = await fetchJSON("/api/cities");
@@ -522,12 +523,8 @@ async function loadCities() {
       <table class="city-table">
         <thead>
           <tr>
-            <th>CITY</th>
-            <th>AVG °C</th>
-            <th>MAX</th>
-            <th>HUM%</th>
-            <th>WIND</th>
-            <th style="width:80px">LOAD</th>
+            <th>CITY</th><th>AVG °C</th><th>MAX</th>
+            <th>HUM%</th><th>WIND</th><th style="width:70px">LOAD</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -541,23 +538,26 @@ async function loadCities() {
               <td class="bar-cell">
                 <div class="mini-bar" style="width:${Math.round((c.avg_temp_c/maxTemp)*100)}%"></div>
               </td>
+              <td onclick="event.stopPropagation()">
+                <button class="remove-btn" onclick="removeCity('${c.city}')">✕ Remove</button>
+              </td>
             </tr>
           `).join("")}
         </tbody>
       </table>`;
     document.getElementById("cityTable").innerHTML = html;
 
-    // Build tabs
+    // Tabs
     const tabs = document.getElementById("trendTabs");
     tabs.innerHTML = cityData.map((c, i) =>
       `<button class="tab-btn${i===0?' active':''}" onclick="loadTrend('${c.city}', this)">${c.city}</button>`
     ).join("");
 
-    // Load first city trend
     if (cityData.length) loadTrend(cityData[0].city);
   } catch {}
 }
 
+// ── TREND CHART ────────────────────────────────────────────────────────────
 async function loadTrend(city, btn) {
   if (btn) {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -575,7 +575,6 @@ function drawChart(data, city) {
     svg.innerHTML = `<text x="200" y="90" text-anchor="middle" fill="#606880" font-family="Space Mono" font-size="11">No trend data</text>`;
     return;
   }
-
   const W = 400, H = 180, PAD = { t:20, r:20, b:40, l:40 };
   const temps = data.map(d => d.avg_temp_c);
   const minT = Math.min(...temps) - 2;
@@ -583,28 +582,22 @@ function drawChart(data, city) {
   const xStep = (W - PAD.l - PAD.r) / Math.max(data.length - 1, 1);
   const yScale = t => PAD.t + (H - PAD.t - PAD.b) * (1 - (t - minT) / (maxT - minT));
   const xOf = i => PAD.l + i * xStep;
-
   const pts = data.map((d, i) => [xOf(i), yScale(d.avg_temp_c)]);
   const pathD = pts.map((p, i) => (i === 0 ? `M` : `L`) + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
   const areaD = pathD + ` L${pts[pts.length-1][0].toFixed(1)},${H-PAD.b} L${PAD.l},${H-PAD.b} Z`;
-
   const gridLines = [0, .25, .5, .75, 1].map(f => {
     const y = PAD.t + (H - PAD.t - PAD.b) * f;
     const val = (maxT - (maxT - minT) * f).toFixed(1);
     return `<line x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}" stroke="#1e2538" stroke-width="1"/>
             <text x="${PAD.l - 4}" y="${y + 3}" class="chart-label" text-anchor="end">${val}</text>`;
   }).join("");
-
   const dots = pts.map((p, i) =>
     `<circle cx="${p[0]}" cy="${p[1]}" r="3" class="chart-dot"/>
      <text x="${p[0]}" y="${p[1]-8}" class="chart-val" text-anchor="middle">${temps[i]}°</text>`
   ).join("");
-
-  const labels = data.map((d, i) => {
-    const date = d.date.slice(5); // MM-DD
-    return `<text x="${xOf(i)}" y="${H-PAD.b+14}" class="chart-label" text-anchor="middle">${date}</text>`;
-  }).join("");
-
+  const labels = data.map((d, i) =>
+    `<text x="${xOf(i)}" y="${H-PAD.b+14}" class="chart-label" text-anchor="middle">${d.date.slice(5)}</text>`
+  ).join("");
   svg.innerHTML = `
     <defs>
       <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -619,6 +612,7 @@ function drawChart(data, city) {
   `;
 }
 
+// ── RUN HISTORY ────────────────────────────────────────────────────────────
 async function loadRunHistory() {
   try {
     const runs = await fetchJSON("/api/runs");
@@ -636,33 +630,123 @@ async function loadRunHistory() {
   } catch {}
 }
 
+// ── PIPELINE TRIGGER ────────────────────────────────────────────────────────
 async function triggerPipeline() {
   const btn = document.getElementById("runBtn");
-  btn.disabled = true;
-  btn.classList.add("loading");
+  btn.disabled = true; btn.classList.add("loading");
   btn.querySelector(".btn-text").textContent = "RUNNING...";
-
   try {
     const r = await fetch("/api/run", { method: "POST" });
     if (!r.ok) throw new Error();
     toast("✅ Pipeline completed successfully");
     await refresh();
   } catch {
-    toast("⚠️  Start server first: python server.py");
+    toast("⚠️  Start server first: python server.py", "error");
   } finally {
-    btn.disabled = false;
-    btn.classList.remove("loading");
+    btn.disabled = false; btn.classList.remove("loading");
     btn.querySelector(".btn-text").textContent = "▶ RUN_PIPELINE.PY";
   }
 }
 
-async function refresh() {
-  await Promise.all([loadSummary(), loadCities(), loadRunHistory()]);
+// ── CITY MANAGER ────────────────────────────────────────────────────────────
+function onSelectChange() {
+  const val = document.getElementById("citySelect").value;
+  const customInput = document.getElementById("customCityInput");
+  customInput.style.display = val === "__custom__" ? "block" : "none";
+  if (val === "__custom__") customInput.focus();
 }
 
-// Initial load
+async function loadManagedCities() {
+  try {
+    managedCities = await fetchJSON("/api/managed_cities");
+    renderCityChips();
+  } catch {}
+}
+
+function renderCityChips() {
+  const container = document.getElementById("cityChips");
+  if (!managedCities.length) {
+    container.innerHTML = `<span style="font-size:.72rem;color:var(--muted);font-family:var(--mono)">No cities tracked yet.</span>`;
+    return;
+  }
+  container.innerHTML = managedCities.map(c => `
+    <div class="city-chip">
+      <span>📍 ${c.name}</span>
+      <button class="chip-remove" onclick="removeCity('${c.name}')" title="Remove ${c.name}">✕</button>
+    </div>
+  `).join("");
+}
+
+async function addCity() {
+  const select = document.getElementById("citySelect");
+  const customInput = document.getElementById("customCityInput");
+  const btn = document.getElementById("addBtn");
+
+  let cityName = "";
+  if (select.value === "__custom__") {
+    cityName = customInput.value.trim();
+  } else if (select.value) {
+    cityName = select.value;
+  }
+
+  if (!cityName) {
+    toast("⚠️  Please select or type a city name", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "ADDING...";
+
+  try {
+    const r = await fetch("/api/add_city", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: cityName })
+    });
+    const data = await r.json();
+
+    if (data.status === "success") {
+      toast(`✅ ${data.city} added! ${data.records} records loaded.`);
+      select.value = "";
+      customInput.value = "";
+      customInput.style.display = "none";
+      await Promise.all([loadManagedCities(), loadCities(), loadSummary()]);
+    } else {
+      toast(`❌ ${data.message}`, "error");
+    }
+  } catch {
+    toast("❌ Server not reachable. Is it running?", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "＋ ADD CITY";
+  }
+}
+
+async function removeCity(name) {
+  if (!confirm(`Remove "${name}" from tracking? Its weather data will also be deleted.`)) return;
+
+  try {
+    const r = await fetch("/api/remove_city", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    });
+    const data = await r.json();
+    if (data.status === "success") {
+      toast(`🗑️ ${name} removed`);
+      await Promise.all([loadManagedCities(), loadCities(), loadSummary()]);
+    }
+  } catch {
+    toast("❌ Server not reachable.", "error");
+  }
+}
+
+// ── REFRESH ─────────────────────────────────────────────────────────────────
+async function refresh() {
+  await Promise.all([loadSummary(), loadCities(), loadRunHistory(), loadManagedCities()]);
+}
+
 refresh();
-// Auto-refresh every 30s
 setInterval(refresh, 30000);
 </script>
 </body>
